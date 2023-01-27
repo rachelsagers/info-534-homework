@@ -2,7 +2,7 @@
 title: "INFO 534 Homework 1"
 author: "Rachel Sagers"
 date: "`r Sys.Date()`"
-output: html_document
+output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
@@ -29,13 +29,14 @@ matrixB <- matrix(c(2,4,1,3,1,1,1,-3,-1,3,1,1), nrow=3, ncol=4)
 # matrix multiplication
 matrixC <- matrixA %*% matrixB
 
+# resulting matrix C
 print(matrixC)
-
 ```
 
 **Q2**
 
 ```{r while}
+# while loop
 v <- 10
 while(15 - v > 0.1)
 {
@@ -47,29 +48,28 @@ while(15 - v > 0.1)
 **Q3(a)**
 
 ```{r histogram}
-
-# 5000 random values of x and histogram
-x <- runif(n=5000, min=0, max=100)
+# generate 5000 random values of x and create histogram
+x <- runif(n=5000, min=0, max=1000)
 hist(x)
 ```
 
 **Q3(b)**
 
 ``` {r linear model}
-# put x values into linear model
-a <- 0.2
-
+# linear model function
 output = function(a,x){
 y = -1 + a*x
 return(y)
 }
 
+# generate y values from x values using function
 y <- output(x=x, a=0.2)
 
+# plot of x vs y
 plot(x,y)
 ```
 
-**Q4**
+**Q4(a)**
 
 ```{r log likelihood}
 # the range of the model parameter value to be considered
@@ -77,7 +77,37 @@ a.values = seq(-2,2,0.1)
 
 # log likelihood function
 logL = function(a, x, y){
-  sigma = 1
-  500*log(1/(sqrt(2*pi)*sigma)) - 1/((sigma^2)*(1/2)*sum((a*x - y)^2))
+  sigma=1
+  500*log(1/(sqrt(2*pi)*sigma)) - 1/(sigma^2)*(1/2)*sum((a*x - y)^2)
 }
+
+# create an empty vector to store output of for loop 
+logoutput <- numeric()
+
+# for loop to input all a values in function logL
+for(a in a.values) {
+  output <- logL(a=a, x=x, y=y)
+  logoutput <- c(logoutput, output)
+}
+
+# plot of a values vs logL function output
+plot(a.values, logoutput)
 ```
+
+By visually inspecting the resulting graph, I would estimate that the value of *a* that corresponds to the highest value of the log-likelihood is about **0.4**.
+
+**Q4(b)**
+
+```{r optimmle}
+optim(par=0, logL, x=x, y=y,method = "L-BFGS-B",control = list(fnscale=-1))
+```
+
+If the function argument *fnscale* is set to -1, it will lead to a maximization of the defined log-likelihood. 
+
+**Q4(c)**
+
+```{r mle}
+mleresult <- optim(par=0.5, logL, x=x, y=y,method = "L-BFGS-B",control = list(fnscale=-1))
+print(mleresult$value)
+```
+Yes, the value of the MLE *-1080.794* with the input parameter *0.5* is consistent with the answer in question 4(a).
